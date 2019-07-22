@@ -1,4 +1,4 @@
-version=1.0.0-$(date +%s)
+version=1.0.1-$(date +%s)
 
 if [ "$1" == "clean" ] ; then
     rm -rf */out/

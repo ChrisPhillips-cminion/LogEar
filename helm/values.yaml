@@ -11,7 +11,7 @@ params:
   password: unset
 image:
   repository: cminion/bugle
-  tag: alpha
+  tag: latest
   pullPolicy: Always
 
 imagePullSecrets: []

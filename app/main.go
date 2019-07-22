@@ -15,13 +15,13 @@ package main
 
 import (
 	"bytes"
-	"strings"
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"k8s.io/klog"
+	"log"
 	"net/http"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -40,13 +40,14 @@ func main() {
 	var userSet string
 	var passwordSet string
 
-	flag.StringVar(&podname, "podname", "podname", "PodName")
-	flag.StringVar(&namespace, "namespace", "default", "NameSpace")
-	flag.StringVar(&userSet, "username", "default", "unset")
-	flag.StringVar(&passwordSet, "password", "default", "unset")
+	flag.StringVar(&podname, "podname", "podname", "Target Podname")
+	flag.StringVar(&namespace, "namespace", "default", "Target Namespace")
+	flag.StringVar(&userSet, "username", "unset", "BasicAuth Username for people accessing the log")
+	flag.StringVar(&passwordSet, "password", "unset", "BasicAuth Password for people accessing the log")
 	flag.Parse()
 
 	log.Printf("Version: %v", version)
+
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Printf("%v", err)
@@ -61,49 +62,42 @@ func main() {
 
 	// deploymentsClient := clientset.AppsV1().Deployments(corev1.NamespaceDefault)
 
-
-
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ok:=true
 
-		var user string
-		var password string
-		log.Printf("username '%v' password '%v'", userSet, passwordSet)
-		if (userSet != "unset" && passwordSet  != "unset") {
-			log.Printf("Requesting basic auth")
-			user, password, ok = r.BasicAuth()
-		}
-			log.Printf("%v",user)
-			log.Printf("%v",password)
-			log.Printf("%v",ok)
-			if !ok ||  ( ok && (user != userSet || password != passwordSet)) {
+		if userSet != "unset" && passwordSet != "unset" {
+			user, password, ok := r.BasicAuth()
+			log.Printf("Request by \t\t User : '%v'",user)
+			if !ok || user != userSet || password != passwordSet {
+				log.Printf("Invalid Credentials \t\t User : '%v'",user)
 				w.Header().Set("WWW-Authenticate", `Basic realm="`+namespace+"\t"+podname+`"`)
 				w.WriteHeader(401)
 				w.Write([]byte("Unauthorised.\n"))
 
 			} else {
-
-				fmt.Fprintf(w, reverseLineOrder(getAndPrintLog(namespace,podname,clientset)))
+				val := getAndPrintLog(namespace, podname, clientset)
+				fmt.Fprintf(w, reverseStringByDelimiter(val,"\n"))
 			}
-
+		} else {
+			val := getAndPrintLog(namespace, podname, clientset)
+			fmt.Fprintf(w, reverseStringByDelimiter(val,"\n"))
+		}
 	})
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintf(w, "Healthy")
+		fmt.Fprintf(w, "Healthy")
 	})
 	// fmt.Printf(str)
 	http.ListenAndServe(":80", nil)
 }
 
-func reverseLineOrder(str string) string {
-	array := strings.Split(str,"\n")
-	array2 := make([]string,len(array))
-	count:=len(array);
-	for _,v := range array {
+func reverseStringByDelimiter(str string, del string) string {
+	array := strings.Split(str, del)
+	array2 := make([]string, len(array))
+	count := len(array)
+	for _, v := range array {
 		count--
-		array2[count]=v
+		array2[count] = v
 	}
-	return strings.Join(array2,"\n")
+	return strings.Join(array2, del)
 }
 
 func getAndPrintLog(namespace string, podname string, clientset *kubernetes.Clientset) string {
