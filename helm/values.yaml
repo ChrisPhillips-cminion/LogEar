@@ -5,18 +5,17 @@
 replicaCount: 1
 
 params:
-  namespace: default
-  podname: kubernetes-bootcamp-6bf84cb898-hsg6w
-  username: unset
+  namespace: kube-system #Namespace is the target pod in
+  podname:  calico-node-75wnt     #Name of the target pod
+  username: unset #Credentials to secure webpage showing the log. If either of these are set to 'unset' then there is no challenge.
   password: unset
 image:
   repository: cminion/bugle
-  tag: latest
+  tag: alpha
   pullPolicy: Always
 
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+
 
 service:
   type: ClusterIP
@@ -36,6 +35,10 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+
+nameOverride: ""
+fullnameOverride: ""
 
 resources: {}
 

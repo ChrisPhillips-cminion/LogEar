@@ -15,15 +15,17 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"k8s.io/klog"
 	"net/http"
 
 	corev1 "k8s.io/api/core/v1"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/rest"
@@ -44,66 +46,77 @@ func main() {
 	flag.StringVar(&passwordSet, "password", "default", "unset")
 	flag.Parse()
 
-	fmt.Printf("Version: %v", version)
+	log.Printf("Version: %v", version)
 	config, err := rest.InClusterConfig()
 	if err != nil {
+		log.Printf("%v", err)
 		klog.Fatal(err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
+		log.Printf("%v", err)
 		klog.Fatal(err)
 	}
 
-	deploymentsClient := clientset.AppsV1().Deployments(corev1.NamespaceDefault)
-	list, err := deploymentsClient.List(metav1.ListOptions{})
-	if err != nil {
-		panic(err)
-	}
-	for _, d := range list.Items {
-		fmt.Printf(" * %s (%d replicas)\n", d.Name, *d.Spec.Replicas)
-	}
+	// deploymentsClient := clientset.AppsV1().Deployments(corev1.NamespaceDefault)
 
-	if err != nil {
-		klog.Fatal(err)
+
+
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ok:=true
+
+		var user string
+		var password string
+		log.Printf("username '%v' password '%v'", userSet, passwordSet)
+		if (userSet != "unset" && passwordSet  != "unset") {
+			log.Printf("Requesting basic auth")
+			user, password, ok = r.BasicAuth()
+		}
+			log.Printf("%v",user)
+			log.Printf("%v",password)
+			log.Printf("%v",ok)
+			if !ok ||  ( ok && (user != userSet || password != passwordSet)) {
+				w.Header().Set("WWW-Authenticate", `Basic realm="`+namespace+"\t"+podname+`"`)
+				w.WriteHeader(401)
+				w.Write([]byte("Unauthorised.\n"))
+
+			} else {
+
+				fmt.Fprintf(w, reverseLineOrder(getAndPrintLog(namespace,podname,clientset)))
+			}
+
+	})
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "Healthy")
+	})
+	// fmt.Printf(str)
+	http.ListenAndServe(":80", nil)
+}
+
+func reverseLineOrder(str string) string {
+	array := strings.Split(str,"\n")
+	array2 := make([]string,len(array))
+	count:=len(array);
+	for _,v := range array {
+		count--
+		array2[count]=v
 	}
-	podLogOpts := corev1.PodLogOptions{}
-	req := clientset.CoreV1().Pods("default").GetLogs("kubernetes-bootcamp-6bf84cb898-hsg6w", &podLogOpts)
+	return strings.Join(array2,"\n")
+}
+
+func getAndPrintLog(namespace string, podname string, clientset *kubernetes.Clientset) string {
+	req := clientset.CoreV1().Pods(namespace).GetLogs(podname, &corev1.PodLogOptions{})
 	podLogs, err := req.Stream()
 	if err != nil {
 		klog.Fatal(err)
 	}
 	defer podLogs.Close()
-
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLogs)
 	if err != nil {
 		klog.Fatal(err)
 	}
-	str := buf.String()
-
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if (userSet != "unset" && passwordSet  != "unset") {
-			user, password, ok := r.BasicAuth()
-			// fmt.Printf("%v",user)
-			// fmt.Printf("%v",password)
-			// fmt.Printf("%v",ok)
-			if !ok || user != userSet || password != passwordSet {
-				w.Header().Set("WWW-Authenticate", `Basic realm="`+namespace+"-"+podname+`"`)
-				w.WriteHeader(401)
-				w.Write([]byte("Unauthorised.\n"))
-
-			} else {
-				fmt.Fprintf(w, str)
-			}
-		} else {
-			fmt.Fprintf(w, str)
-		}
-	})
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintf(w, "Healthy")
-	})
-	fmt.Printf(str)
-	http.ListenAndServe(":80", nil)
+	return buf.String()
 }

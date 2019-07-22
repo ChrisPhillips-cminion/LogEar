@@ -1,4 +1,4 @@
-version=0.01-$(date +%s)
+version=1.0.0-$(date +%s)
 
 if [ "$1" == "clean" ] ; then
     rm -rf */out/
@@ -27,6 +27,15 @@ cd container
 rm -rf bug*
 cp ../app/out/$version/* .
 docker build -t cminion/bugle:$version .
-docker tag  cminion/bugle:$version  cminion/bugle:latest
-docker tag  cminion/bugle:$version  cminion/bugle:latest
 cd ..
+
+if [ "$1" == "release" ] ; then
+  docker tag  cminion/bugle:$version  cminion/bugle:latest
+  docker push cminion/bugle:$version  cminion/bugle:latest
+else
+  docker tag  cminion/bugle:$version  cminion/bugle:alpha
+  docker push cminion/bugle:alpha
+fi
+
+cd helm
+helm delete rii --purge && helm install . --name rii
