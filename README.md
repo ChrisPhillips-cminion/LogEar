@@ -1,7 +1,7 @@
 # LogEar
 
 
-For full introduction of LogEar please go to  (https://chrisphillips-cminion.github.io/kubernetes/2019/07/23/LogEar.html)[https://chrisphillips-cminion.github.io/kubernetes/2019/07/23/LogEar.html]
+For full introduction of LogEar please go to  https://chrisphillips-cminion.github.io/kubernetes/2019/07/23/LogEar.html
 
 LogEar is a container that runs in kubernetes and allows access to the log of a single other container via a webpage. Multiple instances can be run if multiple container logs are required.
 
