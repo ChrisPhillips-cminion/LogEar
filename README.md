@@ -1,7 +1,7 @@
 # LogEar
 
 
-For full introduction of LogEar please go to  (https://chrisphillips-cminion.github.io/kubernetes/2019/07/22/LogEar.html)[https://chrisphillips-cminion.github.io/kubernetes/2019/07/22/LogEar.html]
+For full introduction of LogEar please go to  https://chrisphillips-cminion.github.io/kubernetes/2019/07/23/LogEar.html
 
 LogEar is a container that runs in kubernetes and allows access to the log of a single other container via a webpage. Multiple instances can be run if multiple container logs are required.
 
@@ -13,7 +13,7 @@ The container is published to docker hub and so can be downloaded directly from 
 
 ## Instructions for use
 
-If you want to deploy this app you only require the helm chart. Everything else is available in the container on Docker Hub. (http://hub.docker.com/u/cminion/LogEar)[http://hub.docker.com/u/cminion/LogEar]
+If you want to deploy this app you only require the helm chart. Everything else is available in the container on Docker Hub. http://hub.docker.com/u/cminion/logear
 
 In the values file for the helm chart the following parameters will need to be set
 
