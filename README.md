@@ -13,7 +13,7 @@ The container is published to docker hub and so can be downloaded directly from 
 
 ## Instructions for use
 
-If you want to deploy this app you only require the helm chart. Everything else is available in the container on Docker Hub. (http://hub.docker.com/u/cminion/LogEar)[http://hub.docker.com/u/cminion/LogEar]
+If you want to deploy this app you only require the helm chart. Everything else is available in the container on Docker Hub. http://hub.docker.com/u/cminion/logear
 
 In the values file for the helm chart the following parameters will need to be set
 
