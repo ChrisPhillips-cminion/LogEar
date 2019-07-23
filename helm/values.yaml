@@ -11,7 +11,7 @@ params:
   password: unset
 image:
   repository: cminion/logear
-  tag: alpha
+  tag: latest
   pullPolicy: Always
 
 imagePullSecrets: []
