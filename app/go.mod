@@ -1,4 +1,4 @@
-module "https://github.com/ChrisPhillips-cminion/Bugle"
+module "https://github.com/ChrisPhillips-cminion/LogEar"
 
 go 1.12
 

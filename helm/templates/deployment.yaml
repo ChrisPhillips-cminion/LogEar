@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "bugle.fullname" . }}
+  name: {{ include "LogEar.fullname" . }}
   labels:
-{{ include "bugle.labels" . | indent 4 }}
+{{ include "LogEar.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "bugle.name" . }}
+      app.kubernetes.io/name: {{ include "LogEar.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
-    serviceAccount: {{ include "bugle.fullname" . }}
+    serviceAccount: {{ include "LogEar.fullname" . }}
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "bugle.name" . }}
+        app.kubernetes.io/name: {{ include "LogEar.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
     {{- with .Values.imagePullSecrets }}

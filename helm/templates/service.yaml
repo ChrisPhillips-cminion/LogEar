@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "bugle.fullname" . }}
+  name: {{ include "LogEar.fullname" . }}
   labels:
-{{ include "bugle.labels" . | indent 4 }}
+{{ include "LogEar.labels" . | indent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,5 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "bugle.name" . }}
+    app.kubernetes.io/name: {{ include "LogEar.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

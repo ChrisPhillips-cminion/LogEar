@@ -1,7 +1,7 @@
 FROM debian
-COPY ./bugle*  /bugle
+COPY ./LogEar*  /LogEar
 ENV namespace default
 ENV podname podname
 ENV username user
 ENV password pass
-ENTRYPOINT /bugle -podname $podname -namespace $namespace -username $username -password $password
+ENTRYPOINT /LogEar -podname $podname -namespace $namespace -username $username -password $password

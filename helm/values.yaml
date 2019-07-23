@@ -1,17 +1,17 @@
-# Default values for bugle.
+# Default values for LogEar.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 params:
-  namespace: kube-system #Namespace is the target pod in
-  podname:  calico-node-75wnt     #Name of the target pod
+  namespace: default #Namespace is the target pod in
+  podname:  nihilist-eagle-nginx-ingress-controller-5688d488d5-5lstd     #Name of the target pod
   username: unset #Credentials to secure webpage showing the log. If either of these are set to 'unset' then there is no challenge.
   password: unset
 image:
-  repository: cminion/bugle
-  tag: latest
+  repository: cminion/logear
+  tag: alpha
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -29,7 +29,7 @@ ingress:
   hosts:
     - host: cminion.cf
       paths:
-        - "/bugle"
+        - "/LogEar"
 
   tls: []
   #  - secretName: chart-example-tls

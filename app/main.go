@@ -61,10 +61,13 @@ func main() {
 	}
 
 	// deploymentsClient := clientset.AppsV1().Deployments(corev1.NamespaceDefault)
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Healthy")
+	})
+	http.HandleFunc("/LogEar/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request Made")
 		if userSet != "unset" && passwordSet != "unset" {
+			log.Printf("Required")
 			user, password, ok := r.BasicAuth()
 			log.Printf("Request by \t\t User : '%v'",user)
 			if !ok || user != userSet || password != passwordSet {
@@ -78,13 +81,12 @@ func main() {
 				fmt.Fprintf(w, reverseStringByDelimiter(val,"\n"))
 			}
 		} else {
+			log.Printf("Auth not required")
 			val := getAndPrintLog(namespace, podname, clientset)
 			fmt.Fprintf(w, reverseStringByDelimiter(val,"\n"))
 		}
 	})
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Healthy")
-	})
+
 	// fmt.Printf(str)
 	http.ListenAndServe(":80", nil)
 }
@@ -104,8 +106,8 @@ func getAndPrintLog(namespace string, podname string, clientset *kubernetes.Clie
 	req := clientset.CoreV1().Pods(namespace).GetLogs(podname, &corev1.PodLogOptions{})
 	podLogs, err := req.Stream()
 	if err != nil {
-		klog.Fatal(err)
-	}
+		return fmt.Sprintf("Error retrieving POD '%v' in namespace '%v'",podname,namespace);
+	} else {
 	defer podLogs.Close()
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLogs)
@@ -113,4 +115,5 @@ func getAndPrintLog(namespace string, podname string, clientset *kubernetes.Clie
 		klog.Fatal(err)
 	}
 	return buf.String()
+	}
 }
